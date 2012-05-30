@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>zkplus: The API ZooKeeper should have had</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="media/css/restdown.css">
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+</head>
+<body>
+<div id="header">
+    <h1>zkplus: The API ZooKeeper should have had Documentation</h1>
+</div>
+
+    <div id="sidebar">
+<ul>
+  <li><div><a href="#installation">Installation</a></div></li>
+  <li><div><a href="#api">API</a></div>
+  <ul>
+    <li><div><a href="#zkpluszkerror">zkplus.ZKError</a></div></li>
+    <li><div><a href="#zkpluscreateclientoptions">zkplus.createClient(options)</a></div></li>
+    <li><div><a href="#class-zkpluszkclient">Class: zkplus.ZKClient</a></div></li>
+    <li><div><a href="#zkpluscreateelectionoptions">zkplus.createElection(options)</a></div></li>
+    <li><div><a href="#class-zkpluselection">Class: zkplus.Election</a></div></li>
+  </ul></li>
+  <li><div><a href="#license-mit">License (MIT)</a></div></li>
+  <li><div><a href="#development-guidelines">Development Guidelines</a></div>
+  <ul>
+    <li><div><a href="#directory-layout">Directory Layout</a></div></li>
+    <li><div><a href="#makefile">Makefile</a></div></li>
+    <li><div><a href="#coding-style">Coding Style</a></div></li>
+    <li><div><a href="#testing">Testing</a></div></li>
+  </ul></li>
+</ul>
+
+    </div>
+    <div id="content">
+
+<h1>About zkplus</h1>
+<div class="intro">
+
+
+<p><a href="https://mcavage.github.com/node-zkplus">zkplus</a> is a
+<a href="http://nodejs.org/">Node.js</a> module that makes interacting with
+<a href="http://zookeeper.apache.org/">ZooKeeper</a> much easier.  If you haven't worked
+with the ZooKeeper <a href="http://zookeeper.apache.org/doc/r3.4.3/zookeeperProgrammers.html#ZooKeeper+C+client+API">API</a>
+directly, and question the value of this project, do so, then get back to me.</p>
+
+<h2>Conventions</h2>
+
+<p>Any content formatted like this:</p>
+
+<pre class="shell"><code>curl localhost:8080
+</code></pre>
+
+<p>is a command-line example that you can run from a shell.</p>
+
+
+</div>
+<h1 id="installation">Installation</h1>
+
+<pre class="shell"><code>npm install zkplus
+</code></pre>
+
+<h1 id="api">API</h1>
+
+<p>The <code>zkplus</code> API resembles Node's <a href="http://nodejs.org/api/fs.html">fs</a>
+module quit a bit, with the caveat that data is always assumed to be JSON.
+That seems sensible and universal for most uses of ZK, and indeed makes this
+API quite a bit nicer.  If you're doing something crazy like storing images and
+videos in ZooKeeper, you're doing it wrong, so move along.</p>
+
+<p>At a high-level, this API provides facilities for creating "directories",
+"files", and setting "watches" (ZK only provides the latter as an actual
+primitive; everything else is approximated here).  Additionally, there is bonus
+functionality to perform leader election, a la the ZK
+<a href="http://zookeeper.apache.org/doc/trunk/recipes.html#sc_leaderElection">cookbook</a>
+.</p>
+
+<p>Hello world example:</p>
+
+<pre><code>var assert = require('assert');
+var zkplus = require('zkplus');
+
+var client = zkplus.createClient({
+        servers: [{
+            host: 'localhost'
+            port: 2181
+        }]
+});
+
+client.on('connect', function () {
+        client.mkdirp('/foo/bar', function (err) {
+                assert.ifError(err);
+                client.rmr('/foo', function (err) {
+                        assert.ifError(err);
+                        client.close();
+                });
+        });
+});
+</code></pre>
+
+<p>All that did was make some set of znodes in ZooKeeper recursively, and clean up.</p>
+
+<h2 id="zkpluszkerror">zkplus.ZKError</h2>
+
+<p>Most all of the APIs from <code>Client</code> and <code>Election</code> will always return an
+<code>instanceof ZKError</code>.  This <code>Error</code> object will have <code>code</code> and <code>message</code>
+properties, that are directly returned from ZooKeeper. You can switch on them
+with off the properties hung off the main exports of zkplus (which are just
+re-exported from
+<a href="https://github.com/yfinkelstein/node-zookeeper/">node-zookeeper</a>).</p>
+
+<h2 id="zkpluscreateclientoptions">zkplus.createClient(options)</h2>
+
+<p>Creating a client is straightforward, as you simply invoke the
+<code>createClient</code> API, which takes an options object with the options
+below. Note that the <code>servers</code> parameter can be omitted if you only want to talk
+to a single ZooKeeper node; in that case, you can just use <code>host</code> as a top-level
+argument (useful for development).</p>
+
+<pre><code>var zkplus = require('zkplus');
+
+var client = zkplus.createClient({
+        host: 'localhost' // instead of servers: [{host: 'localhost'}]
+});
+</code></pre>
+
+<table>
+<tbody>
+<tr><td><strong>Option</strong></td><td><strong>Type</strong></td><td><strong>Description</strong></td></tr>
+<tr><td>connect</td><td>Boolean</td><td>(Optional) whether or not to automatically connect. Defaults to <code>true</code>.</td></tr>
+<tr><td>log</td><td>Object</td><td>(Optional) <a href="https://github.com/trentm/node-bunyan">bunyan</a> instance.</td></tr>
+<tr><td>servers</td><td>Array<Object>]</td><td>An array of objects with <em>host</em> and optionally <em>port</em> set (default is <code>2181</code>).</td></tr>
+<tr><td>timeout</td><td>Number</td><td>(Optional) ZK timeout (passed directly to ZK driver). Defaults to 30s. Specify in milliseconds.</td></tr>
+</tbody>
+</table>
+
+<h2 id="class-zkpluszkclient">Class: zkplus.ZKClient</h2>
+
+<p>This is an <a href="http://nodejs.org/api/events.html#events_class_events_eventemitter">EventEmitter</a>
+with the following events and methods.</p>
+
+<h3>Event: 'close'</h3>
+
+<pre><code>function onClose() { }
+</code></pre>
+
+<p>Emitted when the client has successfully been disconnected from the ZooKeeper
+server. Typically emitted after a call to the <code>close()</code> API.</p>
+
+<h3>Event: 'connect'</h3>
+
+<pre><code>function onConnect() { }
+</code></pre>
+
+<p>Emitted when the client has successfully connected to the ZooKeeper server.</p>
+
+<h3>Event: 'error'</h3>
+
+<pre><code>function onError(err) { }
+</code></pre>
+
+<p>If the client driver has an unexpected error, it is sent here.</p>
+
+<h3>client.connect([callback])</h3>
+
+<p>Explicitly connects to the ZooKeeper server(s) passed in at instantiation time.
+You only need to call this if you explicitly passed <code>connect: false</code> into
+<code>createClient</code>.  Optionally takes a callback of the form <code>function (err)</code>; also
+emits the <code>connect</code> event when complete.</p>
+
+<h3>client.close()</h3>
+
+<p>Shuts down the connection to the ZooKeeper server(s).  Emits the <code>close</code> event
+when done.</p>
+
+<h4>client.creat(path, [options], callback)</h4>
+
+<p>Creates a "file" (really a znode) in ZooKeeper.  the <code>options</code> parameter may be
+specified, in which case, that drives the semantics.  If you pass in <code>flags</code> to
+<code>sequence</code>, then ZK will automatically generate a new "key" for you.  Either
+way, you can pass in <code>ephemeral</code>, such that ZK will remove the znode when this
+client disconnects.  Lastly, you can pass in an <code>object</code> parameters that gets
+serialized as the data blob. <code>callback</code> is of the form <code>function (err, path)</code>
+where the path is provided back to you (essential if <code>sequence</code> was set).</p>
+
+<pre><code>var opts = {
+        flags: ['sequence'],
+        object: {
+                hostname: require('os').hostname()
+        }
+};
+client.creat('/foo/bar', opts, function (err, path) {
+        assert.ifError(err);
+        console.log(path); // =&gt; /foo/bar/00000000
+});
+</code></pre>
+
+<h3>client.get(path, callback)</h3>
+
+<p>Returns the data associated with a znode, as a JS Object (remember, zkplus
+assumes all data is JSON).  Callback is of the form <code>function (err, object)</code></p>
+
+<pre><code>client.get('/foo/bar/00000000', function (err, obj) {
+        assert.ifError(err);
+        console.log('%j', obj); // =&gt; { "hostname": "your_host_here" }
+});
+</code></pre>
+
+<h3>client.getState()</h3>
+
+<p>Returns the state of the underlying ZooKeeper driver.  Possible states are:</p>
+
+<ul>
+<li>expiredSession</li>
+<li>authFailed</li>
+<li>connecting</li>
+<li>associating</li>
+<li>connected</li>
+<li>unknown (shouldn't happen)</li>
+</ul>
+
+<p>Realistically, you probably only care about <code>connected</code>.</p>
+
+<pre><code>console.log(client.getState()); // =&gt; 'connected'
+</code></pre>
+
+<h3>client.mkdirp(path, callback)</h3>
+
+<p>Does what you think it does.  Recursively creates all znodes specified if they
+don't exist. Note this API is idempotent, as it will not error if the path
+already exists. Callback is of the form <code>function (err)</code>.</p>
+
+<pre><code>client.mkdirp('/foo/bar/baz', function (err) {
+        assert.ifError(err);
+});
+</code></pre>
+
+<h3>client.readdir(path, callback)</h3>
+
+<p>Lists all nodes under a given path, and returns you the keys as relative paths
+only.  The keys returned will be sorted in ascending order.  callback is of the
+form <code>function (err, nodes)</code>.</p>
+
+<pre><code>client.readdir('/foo/bar', function (err, nodes) {
+        assert.ifError(err);
+        console.log(nodes.join()); // =&gt; ['00000000', 'baz']
+});
+</code></pre>
+
+<h3>client.rmr(path, callback)</h3>
+
+<p>Recursively deletes everything under a given path.  I.e., what you'd think
+<code>rm -r</code> would be.  callback is of the form <code>function (err)</code>.</p>
+
+<pre><code>client.rmr('/foo/bar', function (err) {
+        assert.ifError(err);
+});
+</code></pre>
+
+<h3>client.stat(path, callback)</h3>
+
+<p>Returns a ZK stat object for a given path.  ZK stats look like:</p>
+
+<pre><code>{
+        czxid,           // created zxid (long)
+        mzxid,           // last modified zxid (long)
+        ctime,           // created (long)
+        mtime,           // last modified (long)
+        version,         // version (int)
+        cversion,        // child version (int)
+        aversion,        // acl version (int)
+        ephemeralOwner,  // owner session id if ephemeral, 0 otw (string)
+        dataLength,      //length of the data in the node (int)
+        numChildren,     //number of children of this node (int)
+        pzxid            // last modified children (long)
+}
+</code></pre>
+
+<p>Reference the ZooKeeper documentation for more info.</p>
+
+<pre><code>client.stat('/foo', function (err, stats) {
+        assert.ifError(err);
+        console.log('%j', stats);  // =&gt; stuff like above :)
+});
+</code></pre>
+
+<h3>client.unlink(path, [options], callback)</h3>
+
+<p>Removes a "file" from ZooKeeper.  <code>options</code> allows you to pass in a <code>version</code>
+field of the znode you're trying to purge (i.e., test/set semantics).  Otherwise
+the object is stat'd first and then removed (whatever the version is). callback
+is of the form <code>function (err)</code>.</p>
+
+<pre><code>client.unlink('/foo', function (err) {
+        assert.ifError(err);
+});
+
+client.unlink('/foo', {version: 0}, function (err) { ... });
+</code></pre>
+
+<h3>client.upate(path, object, [options], callback)</h3>
+
+<p>Allows you to overwrite the data associated with a given "file".  Again,
+<code>object</code> is JS Object.  <code>options</code> is just link <code>unlink</code>, it's not required, but
+it allows you to pass in a <code>version</code> field for test/set.  <code>callback</code> is of the
+form <code>function (err)</code>.</p>
+
+<pre><code>client.update('/foo', { hello: 'world' }, function (err) {
+        assert.ifError(err);
+});
+</code></pre>
+
+<h3>client.watch(path, [options], callback)</h3>
+
+<p>The <code>watch</code> API makes usable the atrociousness that are ZooKeeper notifications
+(although, as unusable as they are, they're one of its most useful features).
+Using this API, you are able to set watches any time the content of a single
+node changes, or any time children are changed underneath that node. Unlink the
+raw ZooKeeper API, this will also automatically "rewatch" for you, such that
+future changes are still fired through the same listener.</p>
+
+<p>The defaults for this API are to listen only for data changes, and not to return
+you the initial data (i.e., assume you already know what you've got, and just
+want to get notifications about it).  The <code>options</code> parameter drives the other
+behavior, and specifically allows you to set two flags currently: <code>method</code> and
+<code>initialData</code>.  <code>method</code> defaults to <code>data</code>, and the semantics are such that
+only content changes to the znode you've passed in via <code>path</code> will be listened
+for.  If you set <code>method</code> to <code>list</code>, then the semantics of the watch are to
+notify you when any children change (add/del) _under_ <code>path</code>.  You cannot listen
+for both simultaneously; if you want both, you'll need to set two watches.  On
+<code>data</code> watches, the returned listener will fire <code>data</code> events.  On <code>list</code>
+watches, the returned listener will fire <code>children</code> events.  In either case,
+the <code>listener</code> will also have a <code>stop()</code> method on it which takes no arguments
+and closes down the watch.</p>
+
+<p>Additionally, the semantics are not to perform a <code>get</code>, but to only notify you
+on updates.  Setting <code>initialData</code> to <code>true</code> will make the watch fire once
+"up front".</p>
+
+<p><code>callback</code> is of the form <code>function (err, listener)</code>.</p>
+
+<pre><code>client.watch('/foo', function (err, listener) {
+        assert.ifError(err);
+        listener.on('error', function (err) {
+                console.error(err.stack);
+                process.exit(1);
+        });
+
+        listener.on('data', function (obj) {
+                console.log('%j', obj); // =&gt; updated record
+                listener.stop(); // =&gt; shutdown the listener
+        });
+});
+
+client.watch('/foo', { method: 'list' }, function (err, listener) {
+        assert.ifError(err);
+        listener.on('error', function (err) {
+                console.error(err.stack);
+                process.exit(1);
+        });
+
+        listener.on('children', function (children) {
+                console.log('%j', children); // =&gt; ['00000000', 'bar', ...]
+                listener.stop();
+        });
+});
+</code></pre>
+
+<h2 id="zkpluscreateelectionoptions">zkplus.createElection(options)</h2>
+
+<p>zkplus additionally has an "experimental" (albeit functional) ZooKeeper
+leader election class (this is basically a rewrite of
+<a href="https://github.com/mcavage/node-leader">node-leader</a> on top of zkplus).</p>
+
+<p>Leader election is one of the classic use cases for ZooKeeper, and is described
+in their <a href="http://zookeeper.apache.org/doc/trunk/recipes.html#sc_leaderElection">cookbook</a>.
+This implementation is subtly different from that, as it explicitly leaves in
+what their literature describes as "thundering herd" because in every use case
+I've seen for it, frankly the herd isn't that big, and it's highly common that
+non-leaders need to know when there's a new leader (i.e., to change slave
+properties).  To that end, the election class returned here allows one to
+monitor when <code>$self</code> is the new leader, and when someone else has become the
+leader.  Lastly, this can be done without actually participating in the election
+itself.  Note that this API is build on top of <code>ZKClient</code>.</p>
+
+<pre><code>var os = require('os);
+var zkplus = require('zkplus');
+
+var election = zkplus.createElection({
+        client: client,   // returned from zkplus.createClient()
+        path: '/foo/bar', // where to hold the election
+        object: {         // Data to put in our ephemeral node
+                hostname: os.hostname()
+        }
+});
+
+// Need to explicitly vote if we want to participate in the election,
+// as opposed to just observing it.
+election.vote(function (err, isLeader) {
+        assert.ifError(err);
+        console.log(isLeader); // =&gt; 'true' || 'false'
+});
+</code></pre>
+
+<table>
+<tbody>
+<tr><td><strong>Option</strong></td><td><strong>Type</strong></td><td><strong>Description</strong></td></tr>
+<tr><td>client</td><td>ZKClient</td><td>A client created from <code>zkplus.createClient()</code> that is connected.</td></tr>
+<tr><td>path</td><td>String</td><td>Where to hold the election (should be a directory).</td></tr>
+<tr><td>object</td><td>Object</td><td>Data to be serialized in our node, should we choose to vote.</td></tr>
+<tr><td>log</td><td>Object</td><td>(Optional) <a href="https://github.com/trentm/node-bunyan">bunyan</a> instance.</td></tr>
+</tbody>
+</table>
+
+<h2 id="class-zkpluselection">Class: zkplus.Election</h2>
+
+<p>This is an <a href="http://nodejs.org/api/events.html#events_class_events_eventemitter">EventEmitter</a>
+with the following events and methods.</p>
+
+<h3>Event: 'close'</h3>
+
+<pre><code>function onClose() { }
+</code></pre>
+
+<p>Emitted when the election has successfully been terminated from the ZooKeeper
+server. Typically emitted after a call to the <code>stop()</code> API.</p>
+
+<h3>Event: 'error'</h3>
+
+<pre><code>function onError(err) { }
+</code></pre>
+
+<p>If the client driver has an unexpected error, it is sent here.</p>
+
+<h3>Event: 'leader'</h3>
+
+<pre><code>function onLeader() { }
+</code></pre>
+
+<p>Emitted when <code>$self</code> is the new leader.</p>
+
+<h3>Event: 'newLeader'</h3>
+
+<pre><code>function onNewLeader(leader) { }
+</code></pre>
+
+<p>Emitted when another node has assumed the role of leader. <code>leader</code> is the
+relative path; you can get the contents of it by doing
+<code>zkClient.get(path + '/' + leader, function (err, obj) { });</code></p>
+
+<h3>election.getLeader(callback)</h3>
+
+<p>Returns the name and data of whichever node in the election is currently the
+leader. <code>callback</code> is of the form <code>function (err, leader, object)</code> where
+<code>leader</code> is the znode name, and <code>object</code> is the data for that node.</p>
+
+<pre><code>election.getLeader(function (err, leader, object) {
+        assert.ifError(err);
+        console.log(leader);       // =&gt; '00000000'
+        console.log('%j', object); // =&gt; { hostname: 'foo' }
+});
+</code></pre>
+
+<h3>election.isLeader(callback)</h3>
+
+<p>Returns whether or not <code>$self</code> is the leader. <code>callback</code> is of the form
+<code>function (err, isLeader)</code>, where <code>isLeader</code> is a <code>boolean</code>.</p>
+
+<pre><code>election.isLeader(function (err, isLeader) {
+        assert.ifError(err);
+        console.log(isLeader); // =&gt; 'true' || 'false'
+});
+</code></pre>
+
+<h3>election.stop()</h3>
+
+<p>Shuts down this election, and takes <code>$self</code> out of the voting process (if you
+ever called <code>vote()</code>).  Emits the <code>close</code> event when complete.</p>
+
+<pre><code>election.on('close', function () {
+    // all done
+});
+election.stop();
+</code></pre>
+
+<h3>election.vote(callback)</h3>
+
+<p>Registers <code>$self</code> as a participant in the election (if you don't explicitly call
+this, you're only going to be observing someone else's election).  The artifact
+of creating this is that a new ephemeral sequence znode will have been created
+under <code>path</code>, that was passed in at instantiation time.  Calling <code>stop</code> (or
+crashing, exiting the process, etc.) will clean up and remove <code>$self</code> from the
+election. <code>callback</code> is of the the form <code>function (err, isLeader)</code> (just like
+<code>election.isLeader()</code>.</p>
+
+<pre><code>election.vote(function (err, isLeader) {
+        assert.ifError(err);
+        console.log(isLeader); // =&gt; 'true' || 'false'
+});
+</code></pre>
+
+<h1 id="license-mit">License (MIT)</h1>
+
+<p>Copyright (c) 2012 Mark Cavage, All rights reserved.</p>
+
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:</p>
+
+<p>The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE</p>
+
+<h1 id="development-guidelines">Development Guidelines</h1>
+
+<p>I definitely would like to see others contribute here, and in particular add
+some of the ZK recipes (locks, queues, etc.) as first-class citizens to this
+API.  In order to hack on this project, read this.</p>
+
+<p>tl;dr run <code>ZK_HOST=&lt;your ZK server IP here&gt; make prepush</code> before sending a
+pull request.</p>
+
+<h2 id="directory-layout">Directory Layout</h2>
+
+<pre><code>build/          Built bits.
+deps/           Git submodules and/or commited 3rd-party deps should go
+                here. See "node_modules/" for node.js deps.
+docs/           Project docs. Uses restdown from `deps`.
+lib/            JavaScript source files.
+node_modules/   Node.js deps, either populated at build time or commited.
+                See Managing Node Dependencies.
+test/           Test suite.
+tools/          Miscellaneous dev/upgrade/deployment tools and data.
+Makefile        See below.
+package.json    npm module info, if applicable (holds the project version)
+README.md       obvious
+</code></pre>
+
+<h2 id="makefile">Makefile</h2>
+
+<p>This repos has a Makefile that defines the following targets:</p>
+
+<ul>
+<li><code>all</code>: builds all intermediate objects (e.g., binaries, executables, docs,
+etc.). This is the default target.</li>
+<li><code>check</code>: checks all files for adherence to lint, style, and other
+repo-specific rules not described here.</li>
+<li><code>clean</code>: removes all built files</li>
+<li><code>prepush</code>: runs all checks/tests required before pushing changes to the repo</li>
+<li><code>docs</code>: builds documentation (restdown, man pages)</li>
+<li><code>test</code>: runs the automated test suite</li>
+<li><code>cover</code>: generates a coverage report.</li>
+</ul>
+
+<h2 id="coding-style">Coding Style</h2>
+
+<p>Basically tab-free "C style" coding. 80 columns, 8 space indentation, etc.
+Run <code>make check</code> to validate lint and style.</p>
+
+<h2 id="testing">Testing</h2>
+
+<p>In order to test this, you must have a ZooKeeper server running somewhere.
+By default, it's assumed to be on <code>localhost</code> but you can override with
+the environment variable <code>ZK_HOST</code> (and optionally <code>ZK_PORT</code>).  Also, to
+get (lots of) debug logging, set <code>LOG_LEVEL=trace</code>.  For example:</p>
+
+<pre><code>LOG_LEVEL=trace ZK_HOST=192.168.1.2 make test
+</code></pre>
+
+<p>The same goes for the <code>make cover</code> task.</p>
+
+    </div>
+<script type="text/javascript" charset="utf-8">
+$(function() {
+    var headerHeight = $("#header").height();
+
+    var sections = $("#content h1[id], #content h2[id]");
+    var sectionOffsets = [];
+    var slack = 100;  // Give the section scroll some slack (in pixels).
+    sections.each(function(elem) {
+        sectionOffsets.push($(this).offset().top - headerHeight - slack);
+    });
+
+    var currSectionIdx = -1;
+    function getSectionIdx(scrollDistance) {
+        if (scrollDistance < sectionOffsets[0]) {
+            return -1;
+        } else {
+            for (var id = sectionOffsets.length; id > 0; id--) {
+                if (scrollDistance > sectionOffsets[id - 1]) {
+                    return id - 1;
+                    break;
+                }
+            }
+        }
+    }
+
+    /** {{{ http://code.activestate.com/recipes/577787/ (r2) */
+    _slugify_strip_re = /[^\w\s-]/g;
+    _slugify_hyphenate_re = /[-\s]+/g;
+    function slugify(s) {
+      s = s.replace(_slugify_strip_re, '').trim().toLowerCase();
+      s = s.replace(_slugify_hyphenate_re, '-');
+      return s;
+    }
+    /** end of http://code.activestate.com/recipes/577787/ }}} */
+
+    /* See <https://github.com/trentm/restdown/issues/11>. */
+    function safechars(s) {
+      return s.replace(_slugify_strip_re, '');
+    }
+
+    $("#content").scroll(function() {
+        var scrollDistance = $("#content").scrollTop();
+        var sectionIdx = getSectionIdx(scrollDistance);
+
+        if (sectionIdx !== currSectionIdx) {
+            $("#sidebar li>div").removeClass("current");
+            currSectionIdx = sectionIdx;
+            if (currSectionIdx >= 0) {
+                var heading = $(sections[currSectionIdx]).text();
+                var possibleAnchors = [
+                    slugify(heading), // h1 or non-method h2
+                    heading.replace(/ /g, '-'), // h2 method, just name or just endpoint
+                    heading.slice(0, heading.lastIndexOf(' (')).trimRight().replace(/ /g, '-'), // h2 method, name and endpoint
+                ];
+                for (var i=0; i < possibleAnchors.length; i++) {
+                    var anchor = safechars(possibleAnchors[i]);
+                    try {
+                        $("#sidebar a[href=#" + anchor + "]").parent().addClass("current");
+                    } catch (e) {
+                        /* Ignore error if no such element. */
+                        console.log(e)
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+
+</body>
+</html>
