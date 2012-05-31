@@ -131,7 +131,7 @@ emits the `connect` event when complete.
 Shuts down the connection to the ZooKeeper server(s).  Emits the `close` event
 when done.
 
-#### client.creat(path, [options], callback)
+### client.creat(path, [options], callback)
 
 Creates a "file" (really a znode) in ZooKeeper.  the `options` parameter may be
 specified, in which case, that drives the semantics.  If you pass in `flags` to
@@ -246,7 +246,7 @@ is of the form `function (err)`.
 
     client.unlink('/foo', {version: 0}, function (err) { ... });
 
-### client.upate(path, object, [options], callback)
+### client.update(path, object, [options], callback)
 
 Allows you to overwrite the data associated with a given "file".  Again,
 `object` is JS Object.  `options` is just link `unlink`, it's not required, but
