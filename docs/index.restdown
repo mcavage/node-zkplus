@@ -187,6 +187,16 @@ already exists. Callback is of the form `function (err)`.
             assert.ifError(err);
     });
 
+### client.put(path, object, [options], callback)
+
+Creates or overwrites `path` with `object`. You can pass in an options with
+flags of ephemeral if you want that behavior. This API is idempotent.
+Callback is of the form `function (err)`.
+
+    client.put('/foo/bar/hello', {value: 'world'}, function (err) {
+            assert.ifError(err);
+    });
+
 ### client.readdir(path, callback)
 
 Lists all nodes under a given path, and returns you the keys as relative paths

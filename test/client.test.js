@@ -100,6 +100,39 @@ test('getState', function (t) {
 });
 
 
+test('put not exists', function (t) {
+        var obj = {
+                hello: 'world'
+        };
+        ZK.put(FILE, obj, function (err) {
+                t.ifError(err);
+                ZK.get(FILE, function (err2, obj2) {
+                        t.ifError(err2);
+                        t.deepEqual(obj, obj2);
+                        t.end();
+                });
+        });
+});
+
+
+test('put overwrite', function (t) {
+        var obj = {
+                hello: 'world'
+        };
+        ZK.put(FILE, {foo: 'bar'}, function (err) {
+                t.ifError(err);
+                ZK.put(FILE, obj, function (err2) {
+                        t.ifError(err2);
+                        ZK.get(FILE, function (err3, obj2) {
+                                t.ifError(err3);
+                                t.deepEqual(obj, obj2);
+                                t.end();
+                        });
+                });
+        });
+});
+
+
 test('readdir', function (t) {
         ZK.readdir(ROOT, function (err, children) {
                 t.ifError(err);
