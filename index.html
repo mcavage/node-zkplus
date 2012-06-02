@@ -174,7 +174,7 @@ emits the <code>connect</code> event when complete.</p>
 <p>Shuts down the connection to the ZooKeeper server(s).  Emits the <code>close</code> event
 when done.</p>
 
-<h4>client.creat(path, [options], callback)</h4>
+<h3>client.creat(path, [options], callback)</h3>
 
 <p>Creates a "file" (really a znode) in ZooKeeper.  the <code>options</code> parameter may be
 specified, in which case, that drives the semantics.  If you pass in <code>flags</code> to
@@ -232,6 +232,17 @@ don't exist. Note this API is idempotent, as it will not error if the path
 already exists. Callback is of the form <code>function (err)</code>.</p>
 
 <pre><code>client.mkdirp('/foo/bar/baz', function (err) {
+        assert.ifError(err);
+});
+</code></pre>
+
+<h3>client.put(path, object, [options], callback)</h3>
+
+<p>Creates or overwrites <code>path</code> with <code>object</code>. You can pass in an options with
+flags of ephemeral if you want that behavior. This API is idempotent.
+Callback is of the form <code>function (err)</code>.</p>
+
+<pre><code>client.put('/foo/bar/hello', {value: 'world'}, function (err) {
         assert.ifError(err);
 });
 </code></pre>
@@ -299,7 +310,7 @@ is of the form <code>function (err)</code>.</p>
 client.unlink('/foo', {version: 0}, function (err) { ... });
 </code></pre>
 
-<h3>client.upate(path, object, [options], callback)</h3>
+<h3>client.update(path, object, [options], callback)</h3>
 
 <p>Allows you to overwrite the data associated with a given "file".  Again,
 <code>object</code> is JS Object.  <code>options</code> is just link <code>unlink</code>, it's not required, but
