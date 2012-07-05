@@ -65,6 +65,13 @@ after(function (callback) {
 });
 
 
+test('connect no-op', function (t) {
+        ZK.connect(function (err) {
+                t.ifError(err);
+                t.end();
+        });
+});
+
 test('creat no options', function (t) {
         ZK.creat(FILE, function (err, path) {
                 t.ifError(err);
