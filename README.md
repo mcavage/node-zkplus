@@ -17,7 +17,7 @@
     var client = zkplus.createClient({
             servers: [{
                 host: 'localhost'
-                port: 2181
+                , port: 2181
             }]
     });
 
