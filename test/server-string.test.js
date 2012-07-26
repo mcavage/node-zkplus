@@ -72,7 +72,7 @@ test('get', function (t) {
                         hello: 'world'
                 }
         };
-        ZK.creat(FILE, opts, function (err, path) {
+        ZK.create(FILE, opts, function (err, path) {
                 t.ifError(err);
                 t.ok(path);
                 t.equal(FILE, path);

@@ -78,7 +78,7 @@ test('connect no-op', function (t) {
 });
 
 test('creat no options', function (t) {
-        ZK.creat(FILE, function (err, path) {
+        ZK.create(FILE, function (err, path) {
                 t.ifError(err);
                 t.ok(path);
                 t.equal(FILE, path);
@@ -93,7 +93,7 @@ test('get', function (t) {
                         hello: 'world'
                 }
         };
-        ZK.creat(FILE, opts, function (err, path) {
+        ZK.create(FILE, opts, function (err, path) {
                 t.ifError(err);
                 t.ok(path);
                 t.equal(FILE, path);
@@ -157,7 +157,7 @@ test('readdir', function (t) {
 
 
 test('update', function (t) {
-        ZK.creat(FILE, function (err) {
+        ZK.create(FILE, function (err) {
                 t.ifError(err);
                 var obj = {
                         hello: 'world'
@@ -175,7 +175,7 @@ test('update', function (t) {
 
 
 test('unlink', function (t) {
-        ZK.creat(FILE, function (err) {
+        ZK.create(FILE, function (err) {
                 t.ifError(err);
                 ZK.unlink(FILE, function (err2) {
                         t.ifError(err2);
@@ -190,7 +190,7 @@ test('unlink', function (t) {
 
 
 test('watch (data)', function (t) {
-        ZK.creat(FILE, function (err) {
+        ZK.create(FILE, function (err) {
                 t.ifError(err);
                 ZK.watch(FILE, function (err2, watcher) {
                         t.ifError(err2);
@@ -215,7 +215,7 @@ test('watch (data)', function (t) {
 
 
 test('watch (data+initialRead)', function (t) {
-        ZK.creat(FILE, function (err) {
+        ZK.create(FILE, function (err) {
                 t.ifError(err, 'unable to create znone');
 
                 var events = 0;
