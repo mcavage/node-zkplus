@@ -31,6 +31,27 @@
             });
     });
 
+# Tests
+
+    To launch tests you'll need a running zookeeper instance.
+    You can have one locally like this:
+
+    ```bash
+    cd
+    wget http://mirror.speednetwork.de/apache/zookeeper/stable/zookeeper-3.3.5.tar.gz
+    tar -xzvf zookeeper-3.3.5.tar.gz
+    cd zookeeper-3.3.5
+    cp conf/zoo_sample.cfg conf/zoo.cfg
+    sudo ./bin/zkServer.sh start|stop|status
+    ```
+
+    Then to launch tests:
+
+    ```bash
+    cd node-zkplus
+    npm test
+    ```
+
 ## License
 
 The MIT License (MIT)
