@@ -21,13 +21,17 @@ var PATH = ROOT + '/' + uuid().substr(0, 7);
 var FILE = PATH + '/unit_test.json';
 var SUBDIR = PATH + '/foo/bar/baz';
 var ZK;
-
+var connectTimeout;
 
 
 ///--- Tests
 
 before(function (callback) {
         try {
+                connectTimeout = setTimeout(function() {
+                        console.error('Could not connect to a ZK instance, did you start one?');
+                }, 1500);
+
                 ZK = zk.createClient({
                         log: helper.createLogger('zk.client.test.js'),
                         servers: [ {
@@ -37,6 +41,7 @@ before(function (callback) {
                         timeout: 1000
                 });
                 ZK.on('connect', function () {
+                        clearTimeout(connectTimeout);
                         ZK.mkdirp(PATH, function (err) {
                                 if (err) {
                                         console.error(err.stack);
