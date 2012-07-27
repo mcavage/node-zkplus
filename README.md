@@ -7,29 +7,54 @@
 
 # Installation
 
-    npm install zkplus
+``` bash
+npm install zkplus
+```
 
 # Usage
 
-    var assert = require('assert');
-    var zkplus = require('zkplus');
+```js
+var assert = require('assert');
+var zkplus = require('zkplus');
 
-    var client = zkplus.createClient({
-            servers: [{
-                host: 'localhost'
-                , port: 2181
-            }]
-    });
+var client = zkplus.createClient({
+        servers: [{
+            host: 'localhost'
+            , port: 2181
+        }]
+});
 
-    client.on('connect', function () {
-            client.mkdirp('/foo/bar', function (err) {
-                    assert.ifError(err);
-                    client.rmr('/foo', function (err) {
-                            assert.ifError(err);
-                            client.close();
-                    });
-            });
-    });
+client.on('connect', function () {
+        client.mkdirp('/foo/bar', function (err) {
+                assert.ifError(err);
+                client.rmr('/foo', function (err) {
+                        assert.ifError(err);
+                        client.close();
+                });
+        });
+});
+```
+
+# Tests
+
+To launch tests you'll need a running zookeeper instance.
+You can have one locally like this:
+
+```bash
+cd
+wget http://mirror.speednetwork.de/apache/zookeeper/stable/zookeeper-3.3.5.tar.gz
+tar -xzvf zookeeper-3.3.5.tar.gz
+cd zookeeper-3.3.5
+cp conf/zoo_sample.cfg conf/zoo.cfg
+sudo ./bin/zkServer.sh start|stop|status
+```
+
+Then to launch tests:
+
+```bash
+cd node-zkplus
+npm test
+```
 
 ## License
 

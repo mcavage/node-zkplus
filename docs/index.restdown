@@ -131,7 +131,7 @@ emits the `connect` event when complete.
 Shuts down the connection to the ZooKeeper server(s).  Emits the `close` event
 when done.
 
-### client.creat(path, [options], callback)
+### client.create(path, [options], callback)
 
 Creates a "file" (really a znode) in ZooKeeper.  the `options` parameter may be
 specified, in which case, that drives the semantics.  If you pass in `flags` to
@@ -147,7 +147,7 @@ where the path is provided back to you (essential if `sequence` was set).
                     hostname: require('os').hostname()
             }
     };
-    client.creat('/foo/bar', opts, function (err, path) {
+    client.create('/foo/bar', opts, function (err, path) {
             assert.ifError(err);
             console.log(path); // => /foo/bar/00000000
     });
