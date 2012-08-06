@@ -8,7 +8,7 @@
                 "bunyan": "0.10.0",
                 "node-uuid": "1.3.3",
                 "vasync": "1.3.0",
-                "zookeeper": "3.4.1-4"
+                "zookeeper": "git://github.com/abarre/node-zookeeper.git"
         },
         "devDependencies": {
                 "cover": "0.2.8",
