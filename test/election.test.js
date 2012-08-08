@@ -1,5 +1,6 @@
 // Copyright 2012 Mark Cavage <mcavage@gmail.com> All rights reserved.
 
+var path = require('path');
 var uuid = require('node-uuid');
 
 var zk = require('../lib');
@@ -17,7 +18,8 @@ var before = helper.before;
 var test = helper.test;
 
 var LOG = helper.createLogger('election.test.js');
-var PATH = '/' + uuid().substr(0, 7);
+var DIR_PATH = '/' + uuid().substr(0, 7);
+var PATH = DIR_PATH + '/' + uuid().substr(0, 7);
 var ZK;
 
 
@@ -40,7 +42,7 @@ before(function (callback) {
         }
 
         ZK.on('connect', function () {
-                ZK.mkdirp(PATH, function (err) {
+                ZK.mkdirp(DIR_PATH, function (err) {
                         if (err) {
                                 console.error(err.stack);
                                 process.exit(1);
@@ -53,10 +55,10 @@ before(function (callback) {
 
 
 after(function (callback) {
-        LOG.trace({path: PATH}, 'after: cleaning up');
-        ZK.rmr(PATH, function (err) {
+        LOG.trace({path: DIR_PATH}, 'after: cleaning up');
+        ZK.rmr(DIR_PATH, function (err) {
                 if (err) {
-                        console.error('Unable to clean up %s', PATH);
+                        console.error('Unable to clean up %s', DIR_PATH);
                         process.exit(1);
                 }
                 ZK.on('close', callback);
