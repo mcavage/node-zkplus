@@ -33,6 +33,7 @@ var VOTER3;
 test('beforeClass', function(t) {
         try {
                 ZK = zk.createClient({
+                        pollInterval: 200,
                         log: LOG,
                         servers: [ {
                                 host: (process.env.ZK_HOST || 'localhost'),
@@ -426,7 +427,8 @@ function _resetState(callback) {
                                                'localhost'),
                                         port: (process.env.ZK_PORT || 2181)
                                 }],
-                                timeout: 1000
+                                timeout: 1000,
+                                pollInterval: 200
                         });
                 } catch (e) {
                         console.error(e.stack);
