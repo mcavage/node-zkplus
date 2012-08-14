@@ -56,6 +56,7 @@ cover: $(NODECOVER)
 test: $(NODEUNIT)
 	$(NODEUNIT) ./test/client.test.js 2>&1 | $(BUNYAN)
 	$(NODEUNIT) ./test/election.test.js 2>&1 | $(BUNYAN)
+	$(NODEUNIT) ./test/general-election.test.js 2>&1 | $(BUNYAN)
 
 include ./tools/mk/Makefile.deps
 include ./tools/mk/Makefile.targ

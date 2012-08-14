@@ -38,7 +38,8 @@ before(function (callback) {
                                 host: (process.env.ZK_HOST || 'localhost'),
                                 port: (process.env.ZK_PORT || 2181)
                         }],
-                        timeout: 1000
+                        timeout: 1000,
+                        pollInterval: 200
                 });
                 ZK.on('connect', function () {
                         clearTimeout(connectTimeout);
