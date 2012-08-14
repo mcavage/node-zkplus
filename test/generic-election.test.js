@@ -71,13 +71,45 @@ test('reset state', function(t) {
 
 test('check voters', function(t) {
         t.ok(VOTER1.amLeader);
+        VOTER1.isLeader(false, true, function(err, isLeader) {
+                t.ok(isLeader);
+        });
         t.notOk(VOTER2.amLeader);
+        VOTER2.isLeader(false, true, function(err, isLeader, leader) {
+                t.notOk(isLeader);
+                t.equal(VOTER1.path.split('-')[1], leader.split('-')[1]);
+        });
         t.notOk(VOTER3.amLeader);
+        VOTER3.isLeader(false, true, function(err, isLeader, leader) {
+                t.notOk(isLeader);
+                t.equal(VOTER2.path.split('-')[1], leader.split('-')[1]);
+        });
         t.equal(VOTER1.path.split('-')[1], VOTER2.leader.split('-')[1]);
         t.equal(VOTER2.path.split('-')[1], VOTER3.leader.split('-')[1]);
-        t.equal();
-        t.equal();
         t.end();
+});
+
+test('check uncached voter1', function(t) {
+        VOTER1.isLeader(false, false, function(err, isLeader) {
+                t.ok(isLeader);
+                t.end();
+        });
+});
+
+test('check uncached voter2', function(t) {
+        VOTER2.isLeader(false, false, function(err, isLeader, leader) {
+                t.notOk(isLeader);
+                t.equal(VOTER1.path.split('-')[1], leader.split('-')[1]);
+                t.end();
+        });
+});
+
+test('check uncached voter3', function(t) {
+        VOTER3.isLeader(false, false, function(err, isLeader, leader) {
+                t.notOk(isLeader);
+                t.equal(VOTER2.path.split('-')[1], leader.split('-')[1]);
+                t.end();
+        });
 });
 
 /**
