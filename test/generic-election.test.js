@@ -450,7 +450,7 @@ function _resetState(callback) {
                 return callback(err);
         });
 
-        function resetZK(callback) {
+        function resetZK(_callback) {
                 try {
                         ZK = zk.createClient({
                                 log: LOG,
@@ -474,7 +474,7 @@ function _resetState(callback) {
                                         process.exit(1);
                                 }
 
-                                callback();
+                                _callback();
                         });
                 });
         }

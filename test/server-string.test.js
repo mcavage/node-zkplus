@@ -28,8 +28,8 @@ var connectTimeout;
 
 before(function (callback) {
         try {
-                connectTimeout = setTimeout(function() {
-                        console.error('Could not connect to a ZK instance, did you start one?');
+                connectTimeout = setTimeout(function () {
+                        console.error('Could not connect to a ZK instance');
                 }, 1500);
 
                 ZK = zk.createClient({
