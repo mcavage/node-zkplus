@@ -6,10 +6,10 @@
         "main": "./lib/index.js",
         "dependencies": {
                 "assert-plus": "0.1.0",
-                "bunyan": "0.10.0",
+                "bunyan": "0.11.0",
                 "node-uuid": "1.3.3",
                 "vasync": "1.3.1",
-                "zookeeper": "git://github.com/yfinkelstein/node-zookeeper.git#29d4726"
+                "zookeeper": "git://github.com/mcavage/node-zookeeper.git#8a28f8c"
         },
         "devDependencies": {
                 "cover": "0.2.8",
