@@ -41,7 +41,7 @@ before(function (callback) {
                         timeout: 1000,
                         pollInterval: 200
                 });
-                ZK.on('connect', function () {
+                ZK.once('connect', function () {
                         clearTimeout(connectTimeout);
                         ZK.mkdirp(PATH, function (err) {
                                 if (err) {
@@ -247,4 +247,33 @@ test('watch (data+initialRead)', function (t) {
                         });
                 });
         });
+});
+
+test('trigger sessionExpired', function (t) {
+        var ZK2 = zk.createClient({
+                log: helper.createLogger('zk.client.test.js'),
+                servers: [ {
+                        host: (process.env.ZK_HOST || 'localhost'),
+                        port: (process.env.ZK_PORT || 2181)
+                }],
+                timeout: 1000,
+                autoReconnect: false
+        });
+        ZK2.on('session_expired', function () {
+                t.end();
+        });
+
+        // to simulate a session expiration, just call ZK.zk.close
+        ZK2.zk.close();
+});
+
+test('autoReconnect', function (t) {
+        var callNumber = 0;
+        ZK.on('connect', function () {
+                t.end();
+        });
+
+        // to simulate a session expiration, just call ZK.zk.close
+        // https://github.com/yfinkelstein/node-zookeeper/blob/master/src/node-zk.cpp#L362-364
+        ZK.zk.close();
 });
