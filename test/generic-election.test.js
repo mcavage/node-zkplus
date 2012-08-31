@@ -37,7 +37,7 @@ test('beforeClass', function(t) {
                         log: LOG,
                         servers: [ {
                                 host: (process.env.ZK_HOST || 'localhost'),
-                                port: (process.env.ZK_PORT || 2181)
+                                port: (parseInt(parseInt(process.env.ZK_PORT, 10), 10) || 2181)
                         }],
                         timeout: 1000
                 });
@@ -457,7 +457,7 @@ function _resetState(callback) {
                                 servers: [ {
                                         host: (process.env.ZK_HOST ||
                                                'localhost'),
-                                        port: (process.env.ZK_PORT || 2181)
+                                        port: (parseInt(process.env.ZK_PORT, 10) || 2181)
                                 }],
                                 timeout: 1000,
                                 pollInterval: 200

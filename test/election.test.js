@@ -32,7 +32,7 @@ before(function (callback) {
                         log: LOG,
                         servers: [ {
                                 host: (process.env.ZK_HOST || 'localhost'),
-                                port: (process.env.ZK_PORT || 2181)
+                                port: (parseInt(process.env.ZK_PORT, 10) || 2181)
                         }],
                         timeout: 1000
                 });

@@ -36,7 +36,7 @@ before(function (callback) {
                         log: helper.createLogger('zk.client.test.js'),
                         servers: [ {
                                 host: (process.env.ZK_HOST || 'localhost'),
-                                port: (process.env.ZK_PORT || 2181)
+                                port: (parseInt(process.env.ZK_PORT, 10) || 2181)
                         }],
                         timeout: 1000,
                         pollInterval: 200
@@ -254,7 +254,7 @@ test('trigger sessionExpired', function (t) {
                 log: helper.createLogger('zk.client.test.js'),
                 servers: [ {
                         host: (process.env.ZK_HOST || 'localhost'),
-                        port: (process.env.ZK_PORT || 2181)
+                        port: (parseInt(process.env.ZK_PORT, 10) || 2181)
                 }],
                 timeout: 1000,
                 autoReconnect: false
