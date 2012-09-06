@@ -22,6 +22,9 @@ var DIR_PATH = '/' + uuid().substr(0, 7);
 var PATH = uuid().substr(0, 7);
 var ZK;
 
+var HOST = process.env.ZK_HOST || 'localhost';
+var PORT = parseInt(process.env.ZK_PORT, 10) || 2181;
+
 
 
 ///--- Tests
@@ -31,8 +34,8 @@ before(function (callback) {
                 ZK = zk.createClient({
                         log: LOG,
                         servers: [ {
-                                host: (process.env.ZK_HOST || 'localhost'),
-                                port: (process.env.ZK_PORT || 2181)
+                                host: HOST,
+                                port: PORT
                         }],
                         timeout: 1000
                 });

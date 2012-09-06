@@ -26,18 +26,21 @@ var VOTER1;
 var VOTER2;
 var VOTER3;
 
+var HOST = process.env.ZK_HOST || 'localhost';
+var PORT = parseInt(process.env.ZK_PORT, 10) || 2181;
+
 
 
 ///--- Tests
 
-test('beforeClass', function(t) {
+test('beforeClass', function (t) {
         try {
                 ZK = zk.createClient({
                         pollInterval: 200,
                         log: LOG,
                         servers: [ {
-                                host: (process.env.ZK_HOST || 'localhost'),
-                                port: (process.env.ZK_PORT || 2181)
+                                host: HOST,
+                                port: PORT
                         }],
                         timeout: 1000
                 });
@@ -62,25 +65,25 @@ test('beforeClass', function(t) {
  * Initial test, test that having 3 voters results in the expected chain of
  * leadership. e.g. 1<-2<-3
  */
-test('reset state', function(t) {
-        _resetState(function(err) {
+test('reset state', function (t) {
+        _resetState(function (err) {
                 t.ifError(err);
                 t.end();
         });
 });
 
-test('check voters', function(t) {
+test('check voters', function (t) {
         t.ok(VOTER1.amLeader);
-        VOTER1.isLeader(false, true, function(err, isLeader) {
+        VOTER1.isLeader(false, true, function (err, isLeader) {
                 t.ok(isLeader);
         });
         t.notOk(VOTER2.amLeader);
-        VOTER2.isLeader(false, true, function(err, isLeader, leader) {
+        VOTER2.isLeader(false, true, function (err, isLeader, leader) {
                 t.notOk(isLeader);
                 t.equal(VOTER1.path.split('-')[1], leader.split('-')[1]);
         });
         t.notOk(VOTER3.amLeader);
-        VOTER3.isLeader(false, true, function(err, isLeader, leader) {
+        VOTER3.isLeader(false, true, function (err, isLeader, leader) {
                 t.notOk(isLeader);
                 t.equal(VOTER2.path.split('-')[1], leader.split('-')[1]);
         });
@@ -89,23 +92,23 @@ test('check voters', function(t) {
         t.end();
 });
 
-test('check uncached voter1', function(t) {
-        VOTER1.isLeader(false, false, function(err, isLeader) {
+test('check uncached voter1', function (t) {
+        VOTER1.isLeader(false, false, function (err, isLeader) {
                 t.ok(isLeader);
                 t.end();
         });
 });
 
-test('check uncached voter2', function(t) {
-        VOTER2.isLeader(false, false, function(err, isLeader, leader) {
+test('check uncached voter2', function (t) {
+        VOTER2.isLeader(false, false, function (err, isLeader, leader) {
                 t.notOk(isLeader);
                 t.equal(VOTER1.path.split('-')[1], leader.split('-')[1]);
                 t.end();
         });
 });
 
-test('check uncached voter3', function(t) {
-        VOTER3.isLeader(false, false, function(err, isLeader, leader) {
+test('check uncached voter3', function (t) {
+        VOTER3.isLeader(false, false, function (err, isLeader, leader) {
                 t.notOk(isLeader);
                 t.equal(VOTER2.path.split('-')[1], leader.split('-')[1]);
                 t.end();
@@ -115,39 +118,39 @@ test('check uncached voter3', function(t) {
 /**
  * Test the serial removal of v1, v2 and the addition of v1, v2.
  */
-test('reset state' + uuid().substr(0,7), function(t) {
+test('reset state' + uuid().substr(0, 7), function (t) {
         // append uuid because nodeunit can't handle test funcs with the same
         // name.
-        _resetState(function(err) {
+        _resetState(function (err) {
                 t.ifError(err);
                 t.end();
         });
 });
 
-test('remove v1', function(t) {
-        VOTER1.once('leader', function() {
+test('remove v1', function (t) {
+        VOTER1.once('leader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER1.once('newLeader', function() {
+        VOTER1.once('newLeader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER2.once('leader', function() {
+        VOTER2.once('leader', function () {
                 t.end();
         });
 
-        VOTER2.once('newLeader', function() {
+        VOTER2.once('newLeader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER3.once('leader', function() {
+        VOTER3.once('leader', function () {
         });
 
-        VOTER3.once('newLeader', function(leader) {
+        VOTER3.once('newLeader', function (leader) {
                 t.ifError(true);
                 t.end();
         });
@@ -156,32 +159,32 @@ test('remove v1', function(t) {
         VOTER1.stop();
 });
 
-test('remove v2', function(t) {
-        VOTER1.once('leader', function() {
+test('remove v2', function (t) {
+        VOTER1.once('leader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER1.once('newLeader', function() {
+        VOTER1.once('newLeader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER2.once('leader', function() {
+        VOTER2.once('leader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER2.once('newLeader', function() {
+        VOTER2.once('newLeader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER3.once('leader', function() {
+        VOTER3.once('leader', function () {
                 t.end();
         });
 
-        VOTER3.once('newLeader', function() {
+        VOTER3.once('newLeader', function () {
                 t.ifError(true);
                 t.end();
         });
@@ -189,38 +192,38 @@ test('remove v2', function(t) {
         VOTER2.stop();
 });
 
-test('add v1 back', function(t) {
-        VOTER1.once('leader', function() {
+test('add v1 back', function (t) {
+        VOTER1.once('leader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER1.once('newLeader', function(leader) {
+        VOTER1.once('newLeader', function (leader) {
                 t.equal(VOTER3.path.split('-')[1], leader.split('-')[1]);
                 t.end();
         });
 
-        VOTER2.once('leader', function() {
+        VOTER2.once('leader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER2.once('newLeader', function() {
+        VOTER2.once('newLeader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER3.once('leader', function() {
+        VOTER3.once('leader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER3.once('newLeader', function() {
+        VOTER3.once('newLeader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER1.vote(function(err) {
+        VOTER1.vote(function (err) {
                 if (err) {
                         t.ifError(err);
                         t.end();
@@ -228,38 +231,38 @@ test('add v1 back', function(t) {
         });
 });
 
-test('add v2 back', function(t) {
-        VOTER1.once('leader', function() {
+test('add v2 back', function (t) {
+        VOTER1.once('leader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER1.once('newLeader', function(leader) {
+        VOTER1.once('newLeader', function (leader) {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER2.once('leader', function() {
+        VOTER2.once('leader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER2.once('newLeader', function(leader) {
+        VOTER2.once('newLeader', function (leader) {
                 t.equal(VOTER1.path.split('-')[1], leader.split('-')[1]);
                 t.end();
         });
 
-        VOTER3.once('leader', function() {
+        VOTER3.once('leader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER3.once('newLeader', function() {
+        VOTER3.once('newLeader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER2.vote(function(err) {
+        VOTER2.vote(function (err) {
                 if (err) {
                         t.ifError(err);
                         t.end();
@@ -270,46 +273,46 @@ test('add v2 back', function(t) {
 /**
  * Test removing the middle node in the election chain.
  */
-test('reset state' + uuid().substr(0,7), function(t) {
-        _resetState(function(err) {
+test('reset state' + uuid().substr(0, 7), function (t) {
+        _resetState(function (err) {
                 t.ifError(err);
                 LOG.info('finished resetting state');
                 t.end();
         });
 });
 
-test('remove v2 ' + uuid().substr(0,7), function(t) {
-        VOTER1.once('leader', function() {
+test('remove v2 ' + uuid().substr(0, 7), function (t) {
+        VOTER1.once('leader', function () {
                 LOG.error('emitter shouldn\'t fire');
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER1.once('newLeader', function(leader) {
+        VOTER1.once('newLeader', function (leader) {
                 LOG.error('emitter shouldn\'t fire');
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER2.once('leader', function() {
+        VOTER2.once('leader', function () {
                 LOG.error('emitter shouldn\'t fire');
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER2.once('newLeader', function(leader) {
+        VOTER2.once('newLeader', function (leader) {
                 LOG.error('emitter shouldn\'t fire');
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER3.once('leader', function() {
+        VOTER3.once('leader', function () {
                 LOG.error('emitter shouldn\'t fire');
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER3.once('newLeader', function(leader) {
+        VOTER3.once('newLeader', function (leader) {
                 t.equal(VOTER1.path.split('-')[1], leader.split('-')[1]);
                 t.end();
         });
@@ -320,46 +323,46 @@ test('remove v2 ' + uuid().substr(0,7), function(t) {
 /**
  * Test removing the middle node and adding it back.
  */
-test('reset state remove v2 ' + uuid().substr(0,7), function(t) {
-        _resetState(function(err) {
+test('reset state remove v2 ' + uuid().substr(0, 7), function (t) {
+        _resetState(function (err) {
                 t.ifError(err);
                 LOG.info('finished resetting state');
                 t.end();
         });
 });
 
-test('add v2 ' + uuid().substr(0,7), function(t) {
-        VOTER1.on('leader', function() {
+test('add v2 ' + uuid().substr(0, 7), function (t) {
+        VOTER1.on('leader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER1.on('newLeader', function() {
+        VOTER1.on('newLeader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER2.on('leader', function() {
+        VOTER2.on('leader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER2.on('newLeader', function(leader) {
+        VOTER2.on('newLeader', function (leader) {
                 t.equal(VOTER3.path.split('-')[1], leader.split('-')[1]);
                 t.end();
         });
 
-        VOTER3.on('leader', function() {
+        VOTER3.on('leader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER3.on('newLeader', function() {
+        VOTER3.on('newLeader', function () {
                 t.ifError(true);
                 t.end();
         });
 
-        VOTER2.vote(function(err) {
+        VOTER2.vote(function (err) {
                 if (err) {
                         t.ifError(err);
                         t.end();
@@ -367,9 +370,9 @@ test('add v2 ' + uuid().substr(0,7), function(t) {
         });
 });
 
-test('afterclass', function(t) {
+test('afterclass', function (t) {
         LOG.info({path: DIR_PATH}, 'after: cleaning up');
-        ZK.on('close', function() {
+        ZK.on('close', function () {
                 t.end();
         });
         ZK.close();
@@ -447,7 +450,7 @@ function _resetState(callback) {
                 if (err) {
                         LOG.error('error resetting state');
                 }
-                return callback(err);
+                return (callback(err));
         });
 
         function resetZK(_callback) {
@@ -455,9 +458,8 @@ function _resetState(callback) {
                         ZK = zk.createClient({
                                 log: LOG,
                                 servers: [ {
-                                        host: (process.env.ZK_HOST ||
-                                               'localhost'),
-                                        port: (process.env.ZK_PORT || 2181)
+                                        host: HOST,
+                                        port: PORT
                                 }],
                                 timeout: 1000,
                                 pollInterval: 200
