@@ -32,6 +32,7 @@ var PORT = parseInt(process.env.ZK_PORT, 10) || 2181;
 before(function (callback) {
         try {
                 ZK = zk.createClient({
+                        connectTimeout: false,
                         log: LOG,
                         servers: [ {
                                 host: HOST,

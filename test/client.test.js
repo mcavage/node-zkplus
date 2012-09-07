@@ -21,7 +21,6 @@ var PATH = ROOT + '/' + uuid().substr(0, 7);
 var FILE = PATH + '/unit_test.json';
 var SUBDIR = PATH + '/foo/bar/baz';
 var ZK;
-var connectTimeout;
 
 var HOST = process.env.ZK_HOST || 'localhost';
 var PORT = parseInt(process.env.ZK_PORT, 10) || 2181;
@@ -32,11 +31,8 @@ var PORT = parseInt(process.env.ZK_PORT, 10) || 2181;
 
 before(function (callback) {
         try {
-                connectTimeout = setTimeout(function () {
-                        console.error('Could not connect to a ZK instance');
-                }, 1500);
-
                 ZK = zk.createClient({
+                        connectTimeout: false,
                         log: helper.createLogger('zk.client.test.js'),
                         servers: [ {
                                 host: HOST,
@@ -46,7 +42,6 @@ before(function (callback) {
                         pollInterval: 200
                 });
                 ZK.once('connect', function () {
-                        clearTimeout(connectTimeout);
                         ZK.mkdirp(PATH, function (err) {
                                 if (err) {
                                         console.error(err.stack);
@@ -255,6 +250,7 @@ test('watch (data+initialRead)', function (t) {
 
 test('trigger sessionExpired', function (t) {
         var ZK2 = zk.createClient({
+                connectTimeout: false,
                 log: helper.createLogger('zk.client.test.js'),
                 servers: [ {
                         host: (process.env.ZK_HOST || 'localhost'),

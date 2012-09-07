@@ -36,6 +36,7 @@ var PORT = parseInt(process.env.ZK_PORT, 10) || 2181;
 test('beforeClass', function (t) {
         try {
                 ZK = zk.createClient({
+                        connectTimeout: false,
                         pollInterval: 200,
                         log: LOG,
                         servers: [ {

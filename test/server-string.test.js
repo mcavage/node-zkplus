@@ -27,19 +27,16 @@ var connectTimeout;
 ///--- Tests
 before(function (callback) {
         try {
-                connectTimeout = setTimeout(function () {
-                        console.error('Could not connect to a ZK instance');
-                        process.exit();
-                }, 1500);
-
                 ZK = zk.createClient({
+                        connectTimeout: false,
                         log: helper.createLogger('zk.server-string.test.js'),
-                        servers: [process.env.ZK_HOST || 'localhost' + ':' +
-                                  process.env.ZK_PORT || '2181'],
+                        servers: [{
+                                host: process.env.ZK_HOST || '127.0.0.1',
+                                port: parseInt(process.env.ZK_PORT || 2181, 10)
+                        } ],
                         timeout: 1000
                 });
                 ZK.on('connect', function () {
-                        clearTimeout(connectTimeout);
                         ZK.mkdirp(PATH, function (err) {
                                 if (err) {
                                         console.error(err.stack);
