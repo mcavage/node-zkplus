@@ -54,9 +54,9 @@ after(function (callback) {
 });
 
 
-test('watching on a non created node', function(t) {
+test('watching on a non created node', function (t) {
         var callcount = 0;
-        var watch = ZK.uwatch(FILE, function(err, data) {
+        var watch = ZK.uwatch(FILE, function (err, data) {
                 callcount++;
                 watch.stop();
                 t.equal(null, err);
@@ -77,12 +77,12 @@ test('watching on a non created node', function(t) {
         ], t.end);
 });
 
-test('watching on a non created node and creating it', function(t) {
+test('watching on a non created node and creating it', function (t) {
         var
                 callcount = 0,
                 expected = {iam: 'anobject'};
 
-        ZK.uwatch(FILE, function(err, data) {
+        ZK.uwatch(FILE, function (err, data) {
                 // console.log(callcount, err, data);
                 switch (callcount) {
                         case 0:
@@ -115,6 +115,9 @@ test('watching on a non created node and creating it', function(t) {
                                 t.equal(null, err);
                                 t.equal(undefined, data);
                         break;
+                        default:
+                                /* I love jslint */
+                        break;
                 }
 
                 if (callcount === 6) {
@@ -132,7 +135,9 @@ test('watching on a non created node and creating it', function(t) {
                 ZK.mkdirp.bind(ZK, FILE),
                 ZK.put.bind(ZK, FILE, expected),
                 ZK.rmr.bind(ZK, FILE)
-        ], function(err) {
-                // console.log(err);
+        ], function (err) {
+                if (err !== null) {
+                        console.log(err);
+                }
         });
 });
