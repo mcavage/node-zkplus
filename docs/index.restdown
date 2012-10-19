@@ -322,6 +322,47 @@ on updates.  Setting `initialData` to `true` will make the watch fire once
             });
     });
 
+### client.uwatch(path, callback)
+
+`uwatch` allows you to register to a path without knowing if it exists or not.
+It also provides a smaller api than `watch` if all you want is just get callbacks
+when your data changed.
+`callback` is of the form `function (err, data)`
+
+You will receives notifications each time your node is: deleted, created or
+when data has changed.
+
+There's a `this.stop()` function in callback scope to stop the `unlimited` watch.
+
+    client.uwatch('/foo', function (err, data) {
+            if (err !== null) {
+                return this.stop();
+            }
+
+            doSomethingWith(data);
+    });
+
+### client.watchPathExistence(path, callback)
+
+`watchPathExistence` allows you to be notified each time your node is deleted or created.
+`callback` is of the form `function (err, exists)`
+
+You will then receives notifications each time your node is: deleted or created.
+
+Using `this.stop()` in callback makes the `unlimited` watch to stop.
+
+    client.watchPathExistence('/I/do/not/exists/right/now', function (err, exists) {
+            if (err !== null) {
+                return this.stop();
+            }
+
+            if (exists) {
+                nice();
+            } else {
+                maybelater();
+            }
+    });
+
 ## zkplus.createElection(options)
 
 zkplus additionally has an "experimental" (albeit functional) ZooKeeper
