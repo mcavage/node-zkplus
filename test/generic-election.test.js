@@ -60,6 +60,7 @@ test('beforeClass', function (t) {
                         t.end();
                 });
         });
+        ZK.connect();
 });
 
 /**
@@ -480,6 +481,7 @@ function _resetState(callback) {
                                 _callback();
                         });
                 });
+                ZK.connect();
         }
 
 }

@@ -51,6 +51,7 @@ before(function (callback) {
                                 callback();
                         });
                 });
+                ZK.connect();
         } catch (e) {
                 console.error(e.stack);
                 process.exit(1);
@@ -248,7 +249,7 @@ test('watch (data+initialRead)', function (t) {
         });
 });
 
-test('trigger sessionExpired', function (t) {
+test('trigger close', function (t) {
         var ZK2 = zk.createClient({
                 connectTimeout: false,
                 log: helper.createLogger('zk.client.test.js'),
@@ -259,20 +260,45 @@ test('trigger sessionExpired', function (t) {
                 timeout: 1000,
                 autoReconnect: false
         });
-        ZK2.on('session_expired', function () {
+        ZK2.on('close', function () {
                 t.end();
         });
-
-        // to simulate a session expiration, just call ZK.zk.close
+        ZK2.connect();
         ZK2.zk.close();
 });
 
-test('autoReconnect', function (t) {
-        ZK.on('connect', function () {
+test('connect to expired session', function (t) {
+        var ZK2 = zk.createClient({
+                connectTimeout: false,
+                log: helper.createLogger('zk.client.test.js'),
+                servers: [ {
+                        host: (process.env.ZK_HOST || 'localhost'),
+                        port: (parseInt(process.env.ZK_PORT, 10) || 2181)
+                }],
+                timeout: 1000,
+                clientId: '13ae15da1420111',
+                clientPassword: '9A9F0236749B498451DB8AD918491CAD',
+                autoReconnect: false
+        });
+        ZK2.on('session_expired', function () {
                 t.end();
         });
+        ZK2.connect();
+});
 
-        // to simulate a session expiration, just call ZK.zk.close
-        // https://github.com/yfinkelstein/node-zookeeper
-        ZK.zk.close();
+test('connect to non-existent zk', function (t) {
+        var ZK2 = zk.createClient({
+                log: helper.createLogger('zk.client.test.js'),
+                servers: [ {
+                        host: 'localhost',
+                        //host: '192.168.1.1',
+                        // note port = 9999
+                        port: 9999
+                }],
+                timeout: 5000
+        });
+        ZK2.on('connection_loss', function () {
+                t.end();
+        });
+        ZK2.connect();
 });

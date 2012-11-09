@@ -55,6 +55,7 @@ before(function (callback) {
                         callback();
                 });
         });
+        ZK.connect();
 });
 
 
