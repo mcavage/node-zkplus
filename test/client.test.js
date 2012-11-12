@@ -7,6 +7,7 @@ var zk = require('../lib');
 if (require.cache[__dirname + '/helper.js'])
         delete require.cache[__dirname + '/helper.js'];
 var helper = require('./helper.js');
+var ZK = require('zookeeper');
 
 
 
@@ -73,6 +74,13 @@ after(function (callback) {
 
 test('connect no-op', function (t) {
         ZK.connect(function (err) {
+                t.ifError(err);
+                t.end();
+        });
+        ZK.on('connect', function() {
+                t.end();
+        });
+        ZK.on('error', function(err) {
                 t.ifError(err);
                 t.end();
         });
@@ -277,10 +285,10 @@ test('connect to expired session', function (t) {
                 }],
                 timeout: 1000,
                 clientId: '13ae15da1420111',
-                clientPassword: '9A9F0236749B498451DB8AD918491CAD',
-                autoReconnect: false
+                clientPassword: '9A9F0236749B498451DB8AD918491CAD'
         });
-        ZK2.on('session_expired', function () {
+        ZK2.on('error', function (err) {
+                t.equal(err.code, -112);
                 t.end();
         });
         ZK2.connect();
