@@ -62,6 +62,8 @@ Hello world example:
             });
     });
 
+    client.connect();
+
 All that did was make some set of znodes in ZooKeeper recursively, and clean up.
 
 ## zkplus.ZKError
@@ -116,7 +118,22 @@ Emitted when the client has successfully connected to the ZooKeeper server.
 
     function onError(err) { }
 
-If the client driver has an unexpected error, it is sent here.
+If the client driver has an unexpected error, it is sent here. Specifically,
+if the client has lost its session to ZK.
+
+### Event: 'connection_interrupted'
+
+    function onConnectionInterrupted() { }
+
+If the underlying native client loses connection to ZK, but not its session,
+it is sent here. Notably, for most applications, this should be a no-op, since
+the session is still alive.
+
+### Event: 'reconnect'
+
+    function onReconnect() { }
+
+if the underlying native client regains its connection to ZK, it is sent here.
 
 ### client.connect([callback])
 
