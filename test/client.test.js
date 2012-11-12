@@ -291,14 +291,44 @@ test('connect to non-existent zk', function (t) {
                 log: helper.createLogger('zk.client.test.js'),
                 servers: [ {
                         host: 'localhost',
-                        //host: '192.168.1.1',
                         // note port = 9999
                         port: 9999
                 }],
                 timeout: 5000
         });
-        ZK2.on('connection_loss', function () {
+        var gotConEvent;
+        ZK2.on('error', function (err) {
+                t.equal(err.code, -4);
+                t.ok(gotConEvent);
                 t.end();
+        });
+        ZK2.on('connection_interrupted', function() {
+                gotConEvent = true;
+        });
+        ZK2.connect();
+});
+
+test('connect to artificial connection timeout', function (t) {
+        var ZK2 = zk.createClient({
+                log: helper.createLogger('zk.client.test.js'),
+                servers: [ {
+                        host: 'localhost',
+                        // note port = 9999
+                        port: 9999
+                }],
+                timeout: 5000,
+                connectTimeout: 1000
+        });
+        var time = Date.now();
+        ZK2.on('error', function (err) {
+                t.equal(err.code, -4);
+                var interval = Date.now() - time;
+                if (interval < 2000) {
+                        t.end();
+                } else {
+                        t.ok(false, 'connect did not timeout in time');
+                        t.end();
+                }
         });
         ZK2.connect();
 });
