@@ -310,7 +310,7 @@ test('connect to non-existent zk', function (t) {
                 t.ok(gotConEvent);
                 t.end();
         });
-        ZK2.on('connection_interrupted', function() {
+        ZK2.on('connection_interrupted', function () {
                 gotConEvent = true;
         });
         ZK2.connect();
