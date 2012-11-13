@@ -256,6 +256,7 @@ test('watch (data+initialRead)', function (t) {
         });
 });
 
+
 test('trigger close', function (t) {
         var ZK2 = zk.createClient({
                 connectTimeout: false,
@@ -274,6 +275,7 @@ test('trigger close', function (t) {
         ZK2.zk.close();
 });
 
+
 test('connect to expired session', function (t) {
         var ZK2 = zk.createClient({
                 connectTimeout: false,
@@ -286,12 +288,13 @@ test('connect to expired session', function (t) {
                 clientId: '13ae15da1420111',
                 clientPassword: '9A9F0236749B498451DB8AD918491CAD'
         });
-        ZK2.on('error', function (err) {
-                t.equal(err.code, -112);
+        ZK2.once('error', function (err) {
+                t.equal(err.code, zk.ZSESSIONEXPIRED);
                 t.end();
         });
         ZK2.connect();
 });
+
 
 test('connect to non-existent zk', function (t) {
         var ZK2 = zk.createClient({
@@ -303,17 +306,14 @@ test('connect to non-existent zk', function (t) {
                 }],
                 timeout: 5000
         });
-        var gotConEvent;
-        ZK2.on('error', function (err) {
-                t.equal(err.code, -4);
-                t.ok(gotConEvent);
+
+        ZK2.once('error', function (err) {
+                t.equal(err.code, zk.ZCONNECTIONLOSS);
                 t.end();
-        });
-        ZK2.on('connection_interrupted', function () {
-                gotConEvent = true;
         });
         ZK2.connect();
 });
+
 
 test('connect to artificial connection timeout', function (t) {
         var ZK2 = zk.createClient({
@@ -328,7 +328,7 @@ test('connect to artificial connection timeout', function (t) {
         });
         var time = Date.now();
         ZK2.on('error', function (err) {
-                t.equal(err.code, -4);
+                t.equal(err.code, zk.ZCONNECTIONLOSS);
                 var interval = Date.now() - time;
                 if (interval < 2000) {
                         t.end();
