@@ -52,7 +52,7 @@ Hello world example:
             }]
     });
 
-    client.on('connect', function () {
+    client.once('connect', function () {
             client.mkdirp('/foo/bar', function (err) {
                     assert.ifError(err);
                     client.rmr('/foo', function (err) {
@@ -112,7 +112,10 @@ server. Typically emitted after a call to the `close()` API.
 
     function onConnect() { }
 
-Emitted when the client has successfully connected to the ZooKeeper server.
+Emitted when the client has successfully connected to the ZooKeeper server. This
+maybe called multiple times if zk temporarily loses its connection to ZK. Hence,
+it's advisable to only listen for the first 'connect' event when initially
+connecting to ZK via once().
 
 ### Event: 'error'
 
