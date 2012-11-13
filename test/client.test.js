@@ -21,7 +21,6 @@ var ROOT = '/' + uuid().substr(0, 7);
 var PATH = ROOT + '/' + uuid().substr(0, 7);
 var FILE = PATH + '/unit_test.json';
 var SUBDIR = PATH + '/foo/bar/baz';
-var ZK;
 
 var HOST = process.env.ZK_HOST || 'localhost';
 var PORT = parseInt(process.env.ZK_PORT, 10) || 2181;
@@ -77,10 +76,10 @@ test('connect no-op', function (t) {
                 t.ifError(err);
                 t.end();
         });
-        ZK.on('connect', function() {
+        ZK.on('connect', function () {
                 t.end();
         });
-        ZK.on('error', function(err) {
+        ZK.on('error', function (err) {
                 t.ifError(err);
                 t.end();
         });
