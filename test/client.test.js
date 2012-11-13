@@ -65,7 +65,7 @@ after(function (callback) {
                         console.error('Unable to clean up %s', ROOT);
                         process.exit(1);
                 }
-                ZK.on('close', callback);
+                ZK.once('close', callback);
                 ZK.close();
         });
 });
@@ -288,7 +288,7 @@ test('connect to expired session', function (t) {
                 clientId: '13ae15da1420111',
                 clientPassword: '9A9F0236749B498451DB8AD918491CAD'
         });
-        ZK2.once('error', function (err) {
+        ZK2.on('error', function (err) {
                 t.equal(err.code, zk.ZSESSIONEXPIRED);
                 t.end();
         });
@@ -301,7 +301,6 @@ test('connect to non-existent zk', function (t) {
                 log: helper.createLogger('zk.client.test.js'),
                 servers: [ {
                         host: 'localhost',
-                        // note port = 9999
                         port: 9999
                 }],
                 timeout: 5000
@@ -311,6 +310,7 @@ test('connect to non-existent zk', function (t) {
                 t.equal(err.code, zk.ZCONNECTIONLOSS);
                 t.end();
         });
+
         ZK2.connect();
 });
 
@@ -320,7 +320,6 @@ test('connect to artificial connection timeout', function (t) {
                 log: helper.createLogger('zk.client.test.js'),
                 servers: [ {
                         host: 'localhost',
-                        // note port = 9999
                         port: 9999
                 }],
                 timeout: 5000,
