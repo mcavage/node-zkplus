@@ -129,18 +129,10 @@ If the underlying native client loses connection to ZK, but not its session,
 it is sent here. Notably, for most applications, this should be a no-op, since
 the session is still alive.
 
-### Event: 'reconnect'
-
-    function onReconnect() { }
-
-if the underlying native client regains its connection to ZK, it is sent here.
-
-### client.connect([callback])
+### client.connect()
 
 Explicitly connects to the ZooKeeper server(s) passed in at instantiation time.
-You only need to call this if you explicitly passed `connect: false` into
-`createClient`.  Optionally takes a callback of the form `function (err)`; also
-emits the `connect` event when complete.
+Emits the `connect` event when complete.
 
 
 ### client.close()
