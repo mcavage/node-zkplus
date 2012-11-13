@@ -30,13 +30,13 @@ before(function (callback) {
                 ZK = zk.createClient({
                         connectTimeout: false,
                         log: helper.createLogger('zk.server-string.test.js'),
-                        servers: [{
+                        servers: [ {
                                 host: process.env.ZK_HOST || '127.0.0.1',
                                 port: parseInt(process.env.ZK_PORT || 2181, 10)
                         } ],
                         timeout: 1000
                 });
-                ZK.on('connect', function () {
+                ZK.once('connect', function () {
                         ZK.mkdirp(PATH, function (err) {
                                 if (err) {
                                         console.error(err.stack);
@@ -46,6 +46,7 @@ before(function (callback) {
                                 callback();
                         });
                 });
+                ZK.connect();
         } catch (e) {
                 console.error(e.stack);
                 process.exit(1);

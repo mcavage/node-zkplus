@@ -50,7 +50,7 @@ test('beforeClass', function (t) {
                 process.exit(1);
         }
 
-        ZK.on('connect', function () {
+        ZK.once('connect', function () {
                 ZK.mkdirp(DIR_PATH, function (err) {
                         if (err) {
                                 console.error(err.stack);
@@ -60,6 +60,7 @@ test('beforeClass', function (t) {
                         t.end();
                 });
         });
+        ZK.connect();
 });
 
 /**
@@ -470,7 +471,7 @@ function _resetState(callback) {
                         process.exit(1);
                 }
 
-                ZK.on('connect', function () {
+                ZK.once('connect', function () {
                         ZK.mkdirp(DIR_PATH, function (err) {
                                 if (err) {
                                         console.error(err.stack);
@@ -480,6 +481,7 @@ function _resetState(callback) {
                                 _callback();
                         });
                 });
+                ZK.connect();
         }
 
 }
