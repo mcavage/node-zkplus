@@ -36,7 +36,7 @@ before(function (callback) {
                         } ],
                         timeout: 1000
                 });
-                ZK.on('connect', function () {
+                ZK.once('connect', function () {
                         ZK.mkdirp(PATH, function (err) {
                                 if (err) {
                                         console.error(err.stack);

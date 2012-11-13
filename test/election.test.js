@@ -45,7 +45,7 @@ before(function (callback) {
                 process.exit(1);
         }
 
-        ZK.on('connect', function () {
+        ZK.once('connect', function () {
                 ZK.mkdirp(DIR_PATH, function (err) {
                         if (err) {
                                 console.error(err.stack);
