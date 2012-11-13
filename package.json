@@ -20,7 +20,7 @@
                 "bunyan": "0.13.5",
                 "node-uuid": "1.3.3",
                 "vasync": "1.3.1",
-                "zookeeper": "git://github.com/mcavage/node-zookeeper.git#c15e79dada4754fdfe8ede29bc0bf0bd343060fd"
+                "zookeeper": "git://github.com/yunong/node-zookeeper.git"
         },
         "devDependencies": {
                 "cover": "0.2.8",

@@ -52,7 +52,7 @@ Hello world example:
             }]
     });
 
-    client.on('connect', function () {
+    client.once('connect', function () {
             client.mkdirp('/foo/bar', function (err) {
                     assert.ifError(err);
                     client.rmr('/foo', function (err) {
@@ -61,6 +61,8 @@ Hello world example:
                     });
             });
     });
+
+    client.connect();
 
 All that did was make some set of znodes in ZooKeeper recursively, and clean up.
 
@@ -110,20 +112,30 @@ server. Typically emitted after a call to the `close()` API.
 
     function onConnect() { }
 
-Emitted when the client has successfully connected to the ZooKeeper server.
+Emitted when the client has successfully connected to the ZooKeeper server. This
+maybe called multiple times if zk temporarily loses its connection to ZK. Hence,
+it's advisable to only listen for the first 'connect' event when initially
+connecting to ZK via once().
 
 ### Event: 'error'
 
     function onError(err) { }
 
-If the client driver has an unexpected error, it is sent here.
+If the client driver has an unexpected error, it is sent here. Specifically,
+if the client has lost its session to ZK.
 
-### client.connect([callback])
+### Event: 'connection_interrupted'
+
+    function onConnectionInterrupted() { }
+
+If the underlying native client loses connection to ZK, but not its session,
+it is sent here. Notably, for most applications, this should be a no-op, since
+the session is still alive.
+
+### client.connect()
 
 Explicitly connects to the ZooKeeper server(s) passed in at instantiation time.
-You only need to call this if you explicitly passed `connect: false` into
-`createClient`.  Optionally takes a callback of the form `function (err)`; also
-emits the `connect` event when complete.
+Emits the `connect` event when complete.
 
 
 ### client.close()

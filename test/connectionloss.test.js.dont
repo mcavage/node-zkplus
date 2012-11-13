@@ -1,0 +1,38 @@
+var zk = require('../lib');
+
+if (require.cache[__dirname + '/helper.js'])
+        delete require.cache[__dirname + '/helper.js'];
+var helper = require('./helper.js');
+
+
+
+///--- Globals
+
+
+var ZK;
+
+var HOST = process.env.ZK_HOST || 'localhost';
+var PORT = parseInt(process.env.ZK_PORT, 10) || 2181;
+
+ZK = zk.createClient({
+        log: helper.createLogger('zk.client.test.js'),
+        servers: [ {
+                host: (process.env.ZK_HOST || 'localhost'),
+                port: 2181
+        }],
+        timeout: 10000
+});
+
+
+ZK.on('error', function() {
+        ZK.log.error('got error');
+});
+
+ZK.on('connect', function() {
+        ZK.watch('/yunong', function(err, emitter) {
+                emitter.on('error', function(err) {
+                        ZK.log.debug({err: err}, 'got error');
+                });
+        });
+});
+ZK.connect();

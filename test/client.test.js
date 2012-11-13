@@ -7,6 +7,7 @@ var zk = require('../lib');
 if (require.cache[__dirname + '/helper.js'])
         delete require.cache[__dirname + '/helper.js'];
 var helper = require('./helper.js');
+var ZK = require('zookeeper');
 
 
 
@@ -20,7 +21,6 @@ var ROOT = '/' + uuid().substr(0, 7);
 var PATH = ROOT + '/' + uuid().substr(0, 7);
 var FILE = PATH + '/unit_test.json';
 var SUBDIR = PATH + '/foo/bar/baz';
-var ZK;
 
 var HOST = process.env.ZK_HOST || 'localhost';
 var PORT = parseInt(process.env.ZK_PORT, 10) || 2181;
@@ -51,6 +51,7 @@ before(function (callback) {
                                 callback();
                         });
                 });
+                ZK.connect();
         } catch (e) {
                 console.error(e.stack);
                 process.exit(1);
@@ -72,6 +73,13 @@ after(function (callback) {
 
 test('connect no-op', function (t) {
         ZK.connect(function (err) {
+                t.ifError(err);
+                t.end();
+        });
+        ZK.on('connect', function () {
+                t.end();
+        });
+        ZK.on('error', function (err) {
                 t.ifError(err);
                 t.end();
         });
@@ -248,7 +256,7 @@ test('watch (data+initialRead)', function (t) {
         });
 });
 
-test('trigger sessionExpired', function (t) {
+test('trigger close', function (t) {
         var ZK2 = zk.createClient({
                 connectTimeout: false,
                 log: helper.createLogger('zk.client.test.js'),
@@ -259,20 +267,75 @@ test('trigger sessionExpired', function (t) {
                 timeout: 1000,
                 autoReconnect: false
         });
-        ZK2.on('session_expired', function () {
+        ZK2.on('close', function () {
                 t.end();
         });
-
-        // to simulate a session expiration, just call ZK.zk.close
+        ZK2.connect();
         ZK2.zk.close();
 });
 
-test('autoReconnect', function (t) {
-        ZK.on('connect', function () {
+test('connect to expired session', function (t) {
+        var ZK2 = zk.createClient({
+                connectTimeout: false,
+                log: helper.createLogger('zk.client.test.js'),
+                servers: [ {
+                        host: (process.env.ZK_HOST || 'localhost'),
+                        port: (parseInt(process.env.ZK_PORT, 10) || 2181)
+                }],
+                timeout: 1000,
+                clientId: '13ae15da1420111',
+                clientPassword: '9A9F0236749B498451DB8AD918491CAD'
+        });
+        ZK2.on('error', function (err) {
+                t.equal(err.code, -112);
                 t.end();
         });
+        ZK2.connect();
+});
 
-        // to simulate a session expiration, just call ZK.zk.close
-        // https://github.com/yfinkelstein/node-zookeeper
-        ZK.zk.close();
+test('connect to non-existent zk', function (t) {
+        var ZK2 = zk.createClient({
+                log: helper.createLogger('zk.client.test.js'),
+                servers: [ {
+                        host: 'localhost',
+                        // note port = 9999
+                        port: 9999
+                }],
+                timeout: 5000
+        });
+        var gotConEvent;
+        ZK2.on('error', function (err) {
+                t.equal(err.code, -4);
+                t.ok(gotConEvent);
+                t.end();
+        });
+        ZK2.on('connection_interrupted', function () {
+                gotConEvent = true;
+        });
+        ZK2.connect();
+});
+
+test('connect to artificial connection timeout', function (t) {
+        var ZK2 = zk.createClient({
+                log: helper.createLogger('zk.client.test.js'),
+                servers: [ {
+                        host: 'localhost',
+                        // note port = 9999
+                        port: 9999
+                }],
+                timeout: 5000,
+                connectTimeout: 1000
+        });
+        var time = Date.now();
+        ZK2.on('error', function (err) {
+                t.equal(err.code, -4);
+                var interval = Date.now() - time;
+                if (interval < 2000) {
+                        t.end();
+                } else {
+                        t.ok(false, 'connect did not timeout in time');
+                        t.end();
+                }
+        });
+        ZK2.connect();
 });
