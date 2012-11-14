@@ -65,7 +65,7 @@ after(function (callback) {
                         console.error('Unable to clean up %s', ROOT);
                         process.exit(1);
                 }
-                ZK.on('close', callback);
+                ZK.once('close', callback);
                 ZK.close();
         });
 });
@@ -256,6 +256,7 @@ test('watch (data+initialRead)', function (t) {
         });
 });
 
+
 test('trigger close', function (t) {
         var ZK2 = zk.createClient({
                 connectTimeout: false,
@@ -271,8 +272,9 @@ test('trigger close', function (t) {
                 t.end();
         });
         ZK2.connect();
-        ZK2.zk.close();
+        ZK2.close();
 });
+
 
 test('connect to expired session', function (t) {
         var ZK2 = zk.createClient({
@@ -287,18 +289,19 @@ test('connect to expired session', function (t) {
                 clientPassword: '9A9F0236749B498451DB8AD918491CAD'
         });
         ZK2.on('error', function (err) {
-                t.equal(err.code, -112);
+                t.equal(err.code, zk.ZSESSIONEXPIRED);
+                ZK2.close();
                 t.end();
         });
         ZK2.connect();
 });
+
 
 test('connect to non-existent zk', function (t) {
         var ZK2 = zk.createClient({
                 log: helper.createLogger('zk.client.test.js'),
                 servers: [ {
                         host: 'localhost',
-                        // note port = 9999
                         port: 9999
                 }],
                 timeout: 5000
@@ -315,27 +318,3 @@ test('connect to non-existent zk', function (t) {
         ZK2.connect();
 });
 
-test('connect to artificial connection timeout', function (t) {
-        var ZK2 = zk.createClient({
-                log: helper.createLogger('zk.client.test.js'),
-                servers: [ {
-                        host: 'localhost',
-                        // note port = 9999
-                        port: 9999
-                }],
-                timeout: 5000,
-                connectTimeout: 1000
-        });
-        var time = Date.now();
-        ZK2.on('error', function (err) {
-                t.equal(err.code, -4);
-                var interval = Date.now() - time;
-                if (interval < 2000) {
-                        t.end();
-                } else {
-                        t.ok(false, 'connect did not timeout in time');
-                        t.end();
-                }
-        });
-        ZK2.connect();
-});
