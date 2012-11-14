@@ -290,7 +290,6 @@ test('connect to expired session', function (t) {
         });
         ZK2.on('error', function (err) {
                 t.equal(err.code, zk.ZSESSIONEXPIRED);
-                ZK2.close();
                 t.end();
         });
         ZK2.connect();
