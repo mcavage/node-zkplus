@@ -305,11 +305,11 @@ test('connect to non-existent zk', function (t) {
         });
         var gotConEvent;
         ZK2.on('error', function (err) {
-                t.equal(err.code, -4);
+                t.equal(err.code, -112);
                 t.ok(gotConEvent);
                 t.end();
         });
-        ZK2.on('connection_interrupted', function () {
+        ZK2.once('not_connected', function () {
                 gotConEvent = true;
         });
         ZK2.connect();
