@@ -272,7 +272,7 @@ test('trigger close', function (t) {
                 t.end();
         });
         ZK2.connect();
-        ZK2.zk.close();
+        ZK2.close();
 });
 
 
@@ -305,36 +305,15 @@ test('connect to non-existent zk', function (t) {
                 }],
                 timeout: 5000
         });
-
-        ZK2.once('error', function (err) {
-                t.equal(err.code, zk.ZCONNECTIONLOSS);
+        var gotConEvent;
+        ZK2.on('error', function (err) {
+                t.equal(err.code, -112);
+                t.ok(gotConEvent);
                 t.end();
         });
-
-        ZK2.connect();
-});
-
-
-test('connect to artificial connection timeout', function (t) {
-        var ZK2 = zk.createClient({
-                log: helper.createLogger('zk.client.test.js'),
-                servers: [ {
-                        host: 'localhost',
-                        port: 9999
-                }],
-                timeout: 5000,
-                connectTimeout: 1000
-        });
-        var time = Date.now();
-        ZK2.on('error', function (err) {
-                t.equal(err.code, zk.ZCONNECTIONLOSS);
-                var interval = Date.now() - time;
-                if (interval < 2000) {
-                        t.end();
-                } else {
-                        t.ok(false, 'connect did not timeout in time');
-                        t.end();
-                }
+        ZK2.once('not_connected', function () {
+                gotConEvent = true;
         });
         ZK2.connect();
 });
+
