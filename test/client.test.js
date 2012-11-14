@@ -316,4 +316,3 @@ test('connect to non-existent zk', function (t) {
         });
         ZK2.connect();
 });
-
