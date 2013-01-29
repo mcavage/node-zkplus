@@ -1,7 +1,6 @@
-build
-deps
+.gitmodules
 Makefile
-tools
+deps
 docs
-README.md
-.coverage_data
+test
+tools
