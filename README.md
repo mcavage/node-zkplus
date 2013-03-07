@@ -33,6 +33,8 @@ client.on('connect', function () {
                 });
         });
 });
+
+client.connect();
 ```
 
 # Tests
