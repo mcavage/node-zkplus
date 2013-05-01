@@ -124,9 +124,9 @@ connecting to ZK via once().
 If the client driver has an unexpected error, it is sent here. Specifically,
 if the client has lost its session to ZK.
 
-### Event: 'connection_interrupted'
+### Event: 'not_connected'
 
-    function onConnectionInterrupted() { }
+    function onNotConnected() { }
 
 If the underlying native client loses connection to ZK, but not its session,
 it is sent here. Notably, for most applications, this should be a no-op, since
