@@ -21,11 +21,11 @@
                 "node-uuid": "1.4.0",
                 "once": "1.1.1",
                 "vasync": "1.3.3",
-                "zookeeper": "git://github.com/yunong/node-zookeeper.git#5826464"
+                "zookeeper": "git://github.com/yunong/node-zookeeper.git#ee5e285"
         },
         "devDependencies": {
                 "cover": "0.2.8",
-                "nodeunit": "0.8.0"
+                "nodeunit": "git://github.com/yunong/nodeunit.git#4b1bf5e52941b72cf619a246f87b261da95a1231"
         },
         "engines": {
                 "node": ">=0.8"
