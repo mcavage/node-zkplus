@@ -1,7 +1,7 @@
 var zk = require('../lib');
 
 if (require.cache[__dirname + '/helper.js'])
-        delete require.cache[__dirname + '/helper.js'];
+    delete require.cache[__dirname + '/helper.js'];
 var helper = require('./helper.js');
 
 
@@ -15,24 +15,38 @@ var HOST = process.env.ZK_HOST || 'localhost';
 var PORT = parseInt(process.env.ZK_PORT, 10) || 2181;
 
 ZK = zk.createClient({
-        log: helper.createLogger('zk.client.test.js'),
-        servers: [ {
-                host: (process.env.ZK_HOST || 'localhost'),
-                port: 2181
-        }],
-        timeout: 10000
+    log: helper.createLogger('zk.client.test.js'),
+    servers: [ {
+        host: (process.env.ZK_HOST || 'localhost'),
+        port: 2181
+    }],
+    timeout: 10000
 });
 
 
-ZK.on('error', function() {
-        ZK.log.error('got error');
+ZK.on('error', function(err) {
+    //console.log('XXX: error', err);
+    ZK.log.error({err: err}, 'got error');
+    setInterval(function(){}, 1000);
 });
 
 ZK.on('connect', function() {
-        ZK.watch('/yunong', function(err, emitter) {
-                emitter.on('error', function(err) {
-                        ZK.log.debug({err: err}, 'got error');
-                });
-        });
+    console.log('here');
+    var voter = zk.createGenericElection({
+        client: ZK,
+        path: '/yunong',
+        log: ZK.log,
+        object: {}
+    });
+    voter.on('error', function (err) {
+        log.error({err: err}, 'XXX got election err');
+    });
+    //ZK.watch('/yunong', function(err, emitter) {
+        //console.log(emitter, 'XXX');
+        //console.log(err, 'XXX');
+        //emitter.on('error', function(err) {
+            //ZK.log.debug({err: err}, 'got error');
+        //});
+    //});
 });
 ZK.connect();
