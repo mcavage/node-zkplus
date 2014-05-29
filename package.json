@@ -21,7 +21,7 @@
                 "node-uuid": "1.4.0",
                 "once": "1.1.1",
                 "vasync": "1.3.3",
-                "zookeeper": "git://github.com/yunong/node-zookeeper.git#ee5e285"
+                "zookeeper": "3.4.6"
         },
         "devDependencies": {
                 "cover": "0.2.8",
