@@ -17,6 +17,20 @@ var CLIENT;
 
 ///--- Tests
 
+test('constructor tests', function (t) {
+    t.ok(zkplus.createClient());
+    t.ok(zkplus.createClient({
+        host: '::1',
+        port: 2181
+    }));
+    t.ok(zkplus.createClient({
+        servers: ['127.0.0.1:2181']
+    }));
+
+    t.end();
+});
+
+
 test('setup', function (t) {
     CLIENT = zkplus.createClient({
         connectTimeout: false,
@@ -68,6 +82,51 @@ test('creat no options', function (t) {
         t.ok(path);
         t.equal(helper.file, path);
         t.end();
+    });
+});
+
+
+test('create: ephemeral', function (t) {
+    var opts = {
+        flags: ['ephemeral']
+    };
+    var p = helper.dir + '/' + uuid.v4();
+    CLIENT.create(p, {}, opts, function (err, path) {
+        t.ifError(err);
+        t.ok(path);
+        t.equal(p, path);
+        t.end();
+    });
+});
+
+
+test('create: sequential', function (t) {
+    var opts = {
+        flags: ['sequence']
+    };
+    var p = helper.dir + '/' + uuid.v4();
+    CLIENT.create(p, {}, opts, function (err, path) {
+        t.ifError(err);
+        t.ok(path);
+        t.notEqual(p, path);
+        t.end();
+    });
+});
+
+
+test('create: ephemeral_sequential', function (t) {
+    var opts = {
+        flags: ['ephemeral', 'sequence']
+    };
+    CLIENT.create(helper.subdir, {}, opts, function (err, p) {
+        t.ifError(err);
+        t.ok(p);
+        CLIENT.stat(p, function (err2, stat) {
+            t.ifError(err2);
+            t.ok(stat);
+            t.ok((stat || {}).ephemeralOwner);
+            t.end();
+        });
     });
 });
 

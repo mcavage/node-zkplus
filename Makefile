@@ -48,6 +48,7 @@ CLEAN_FILES += ./node_modules
 cover: $(MODULES)
 	@rm -fr ./.coverage_data
 	$(NPM) test --coverage
+	$(NPM) run report
 
 .PHONY: test
 test: $(MODULES)
