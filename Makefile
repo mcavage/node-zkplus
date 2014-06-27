@@ -19,8 +19,6 @@
 #
 BUNYAN		:= ./node_modules/.bin/bunyan
 NPM		:= npm
-NODECOVER	:= ./node_modules/.bin/cover
-NODEUNIT	:= ./node_modules/.bin/nodeunit
 
 #
 # Files
@@ -38,23 +36,22 @@ include ./tools/mk/Makefile.defs
 # Repo-specific targets
 #
 .PHONY: all
-all: $(NODEUNIT) $(REPO_DEPS)
+all: $(MODULES) $(REPO_DEPS)
 	$(NPM) rebuild
 
-$(NODEUNIT):
+$(MODULES):
 	$(NPM) install
 
 CLEAN_FILES += ./node_modules
 
 .PHONY: cover
-cover: $(NODECOVER)
+cover: $(MODULES)
 	@rm -fr ./.coverage_data
-	$(NODECOVER) run $(NODEUNIT) test/*.test.js | $(BUNYAN)
-	$(NODECOVER) report cli
+	$(NPM) test --coverage
 
 .PHONY: test
-test: $(NODEUNIT)
-	$(NODEUNIT) ./test/*.test.js 2>&1 | $(BUNYAN)
+test: $(MODULES)
+	$(NPM) test | $(BUNYAN)
 
 include ./tools/mk/Makefile.deps
 include ./tools/mk/Makefile.targ
