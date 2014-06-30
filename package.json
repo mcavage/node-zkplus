@@ -15,6 +15,9 @@
         "Yunong Xiao"
     ],
     "main": "./lib/index.js",
+    "engines": {
+        "node": ">=0.10"
+    },
     "dependencies": {
         "assert-plus": "0.1.5",
         "bunyan": "0.23.1",
@@ -27,9 +30,6 @@
         "faucet": "0.0.1",
         "istanbul": "0.2.11",
         "tape": "2.13.3"
-    },
-    "engines": {
-        "node": ">=0.10"
     },
     "scripts": {
         "report": "./node_modules/.bin/istanbul report --html && open ./coverage/lcov-report/index.html",

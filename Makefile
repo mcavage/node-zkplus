@@ -35,9 +35,9 @@ include ./tools/mk/Makefile.defs
 #
 # Repo-specific targets
 #
-.PHONY: all
+.PHONY: all modules cover
 all: $(MODULES) $(REPO_DEPS)
-	$(NPM) rebuild
+	$(NPM) install
 
 $(MODULES):
 	$(NPM) install
