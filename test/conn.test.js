@@ -66,7 +66,7 @@ function createProxy(cb) {
         _close.apply(server, arguments);
     };
 
-    server.listen(2181, '127.0.0.1', function () {
+    server.listen(2182, '127.0.0.1', function () {
         cb(null, server);
     });
 }
@@ -95,7 +95,7 @@ test('setup', function (t) {
             servers: [
                 {
                     host: 'localhost',
-                    port: 2181
+                    port: 2182
                 }
             ],
             timeout: 1000
@@ -127,7 +127,7 @@ test('start proxy', function (t) {
     CLIENT.once('connect', function () {
         heartbeat(t);
     });
-    PROXY.listen(2181, '127.0.0.1');
+    PROXY.listen(2182, '127.0.0.1');
 });
 
 
@@ -157,7 +157,7 @@ test('rewatch', function (t) {
         PROXY.close();
 
         process.nextTick(function () {
-            PROXY.listen(2181, '127.0.0.1');
+            PROXY.listen(2182, '127.0.0.1');
         });
     });
 });
@@ -180,7 +180,7 @@ test('re-ephemeral', function (t) {
                 });
             });
 
-            PROXY.listen(2181, '127.0.0.1');
+            PROXY.listen(2182, '127.0.0.1');
         });
         PROXY.close();
     });

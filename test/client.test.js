@@ -77,11 +77,19 @@ test('mkdirp', function (t) {
 
 
 test('creat no options', function (t) {
-    CLIENT.create(helper.file, {}, function (err, path) {
+    var data = {
+        foo: 'bar'
+    };
+    CLIENT.create(helper.file, data, function (err, path) {
         t.ifError(err);
         t.ok(path);
         t.equal(helper.file, path);
-        t.end();
+        CLIENT.get(path, function (err2, obj) {
+            t.ifError(err2);
+            t.ok(obj);
+            t.deepEqual(data, obj);
+            t.end();
+        });
     });
 });
 
