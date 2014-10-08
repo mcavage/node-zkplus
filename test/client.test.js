@@ -63,6 +63,7 @@ test('connect timeout', function (t) {
     t.ok(client);
     client.connect(function (err) {
         t.ok(err);
+        client.close();
         t.end();
     });
 });
