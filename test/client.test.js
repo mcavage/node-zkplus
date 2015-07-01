@@ -174,6 +174,21 @@ test('update', function (t) {
         });
 });
 
+test('sync', function (t) {
+        ZK.create(FILE, function (err) {
+                t.ifError(err);
+                var obj = {
+                        hello: 'world'
+                };
+                ZK.sync(FILE, function (err2) {
+                        t.ifError(err2);
+                        ZK.get(FILE, function (err3, obj2) {
+                                t.ifError(err3);
+                                t.end();
+                        });
+                });
+        });
+});
 
 test('unlink', function (t) {
         ZK.create(FILE, function (err) {
